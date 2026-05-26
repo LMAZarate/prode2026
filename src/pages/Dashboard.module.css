@@ -1,0 +1,68 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.5px solid var(--c-border);
+  background: var(--c-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.logo { font-size: 16px; font-weight: 700; }
+.userMenu { display: flex; align-items: center; gap: 8px; }
+.userName { font-size: 14px; font-weight: 500; }
+
+.main { flex: 1; max-width: 560px; margin: 0 auto; width: 100%; padding: 1.5rem; }
+
+.welcome { margin-bottom: 1.5rem; }
+.h2 { font-size: 22px; font-weight: 600; }
+.sub { font-size: 14px; color: var(--c-text-muted); margin-top: 2px; }
+
+.actions { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+
+.actionCard { margin-bottom: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+.actionTitle { font-size: 14px; font-weight: 500; color: var(--c-text-muted); }
+.codeInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0.5px solid var(--c-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: .05em;
+}
+.codeInput:focus { outline: none; border-color: var(--c-text); }
+.actionBtns { display: flex; gap: 8px; }
+.err { font-size: 13px; color: var(--c-danger); }
+
+.center { display: flex; justify-content: center; padding: 3rem; }
+
+.empty {
+  text-align: center;
+  color: var(--c-text-muted);
+  font-size: 14px;
+  padding: 3rem 0;
+  line-height: 2;
+}
+
+.groupList { display: flex; flex-direction: column; gap: 10px; }
+
+.groupCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.groupCard:hover { background: var(--c-bg); }
+
+.groupIcon { font-size: 24px; }
+.groupInfo { flex: 1; }
+.groupName { font-size: 15px; font-weight: 500; }
+.groupCode { font-size: 12px; color: var(--c-text-muted); margin-top: 2px; }
+.arrow { font-size: 20px; color: var(--c-text-hint); }
