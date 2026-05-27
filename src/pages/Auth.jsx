@@ -10,10 +10,11 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [phone, setPhone] = useState('')
+
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()
-  const navigate = useNavigate()
-
+  const navigate = useNavigate()}
+  const [error, setError] = useState('')
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
