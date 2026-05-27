@@ -7,10 +7,32 @@ import styles from './Group.module.css'
 
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
-function resultSign(home, away) {
-  if (home > away) return 'L'
-  if (home < away) return 'V'
-  return 'E'
+const COUNTRY_CODES = {
+  'Argentina': 'AR', 'Mexico': 'MX', 'Polonia': 'PL', 'Arabia Saudita': 'SA',
+  'Estados Unidos': 'US', 'Gales': 'GB', 'Inglaterra': 'GB', 'Iran': 'IR',
+  'Senegal': 'SN', 'Paises Bajos': 'NL', 'Ecuador': 'EC', 'Qatar': 'QA',
+  'Francia': 'FR', 'Australia': 'AU', 'Dinamarca': 'DK', 'Tunez': 'TN',
+  'Japon': 'JP', 'Costa Rica': 'CR', 'Alemania': 'DE', 'Espana': 'ES',
+  'Marruecos': 'MA', 'Croacia': 'HR', 'Belgica': 'BE', 'Canada': 'CA',
+  'Brasil': 'BR', 'Serbia': 'RS', 'Suiza': 'CH', 'Camerun': 'CM',
+  'Portugal': 'PT', 'Ghana': 'GH', 'Uruguay': 'UY', 'Corea del Sur': 'KR',
+  'Colombia': 'CO', 'Peru': 'PE', 'Argelia': 'DZ', 'Nigeria': 'NG',
+  'Chile': 'CL', 'Irlanda': 'IE', 'Turquia': 'TR',
+  'Egipto': 'EG', 'Nueva Zelanda': 'NZ',
+  'Honduras': 'HN', 'Costa de Marfil': 'CI',
+}
+
+function Flag({ name, size = 40 }) {
+  const code = COUNTRY_CODES[name]
+  if (!code) return <span style={{fontSize: size * 0.7, lineHeight:1}}>🏆</span>
+  return (
+    <img
+      src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`}
+      alt={name}
+      style={{ width: size, height: size * 0.67, objectFit: 'cover', borderRadius: 3, display: 'block' }}
+      onError={e => { e.target.style.display = 'none' }}
+    />
+  )
 }
 
 export default function GroupPage() {
@@ -52,7 +74,6 @@ export default function GroupPage() {
 
   useEffect(() => {
     fetchAll()
-    // Realtime: actualizar tabla y predicciones
     const channel = supabase.channel(`group-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'predictions', filter: `group_id=eq.${id}` }, fetchAll)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'matches' }, fetchAll)
@@ -76,7 +97,7 @@ export default function GroupPage() {
 
     for (const [matchId, pred] of Object.entries(predictions)) {
       const match = matches.find(m => m.id === parseInt(matchId))
-      if (!match || match.status === 'finished') continue
+      if (!match || match.status === 'finished' || match.status === 'locked') continue
       if (match.match_date && new Date(match.match_date) < new Date()) continue
       if (pred.home_score === '' || pred.away_score === '' ||
           pred.home_score === undefined || pred.away_score === undefined) continue
@@ -92,7 +113,7 @@ export default function GroupPage() {
     }
 
     if (upserts.length === 0) {
-      setSavedMsg('No hay pronósticos nuevos para guardar.')
+      setSavedMsg('No hay pronosticos nuevos para guardar.')
       setSaving(false)
       return
     }
@@ -101,8 +122,8 @@ export default function GroupPage() {
       onConflict: 'user_id,group_id,match_id'
     })
 
-    if (error) setSavedMsg('Error al guardar. Intentá de nuevo.')
-    else { setSavedMsg(`✓ ${upserts.length} pronóstico${upserts.length > 1 ? 's' : ''} guardado${upserts.length > 1 ? 's' : ''}`) }
+    if (error) setSavedMsg('Error al guardar. Intenta de nuevo.')
+    else { setSavedMsg(`Guardado! ${upserts.length} pronostico${upserts.length > 1 ? 's' : ''}`) }
     setSaving(false)
     setTimeout(() => setSavedMsg(''), 3000)
   }
@@ -121,18 +142,18 @@ export default function GroupPage() {
     groupedByGroup[key].push(m)
   })
 
-  const matchClosed = (m) => m.status === 'finished' || (m.match_date && new Date(m.match_date) < new Date())
+  const matchClosed = (m) => m.status === 'finished' || m.status === 'locked' || (m.match_date && new Date(m.match_date) < new Date())
 
   if (loading) return <div className={styles.center}><Spinner size={32} /></div>
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <button className={styles.back} onClick={() => navigate('/dashboard')}>‹ Grupos</button>
+        <button className={styles.back} onClick={() => navigate('/dashboard')}>Grupos</button>
         <div className={styles.headerCenter}>
           <div className={styles.groupName}>{group?.name}</div>
-          <div className={styles.groupCode} onClick={copyCode} title="Copiar código">
-            {copied ? '¡Copiado!' : `Código: ${group?.code}`}
+          <div className={styles.groupCode} onClick={copyCode} title="Copiar codigo">
+            {copied ? 'Copiado!' : `Codigo: ${group?.code}`}
           </div>
         </div>
         <Avatar name={profile?.username || ''} color={profile?.avatar_color} size={32} />
@@ -141,7 +162,7 @@ export default function GroupPage() {
       <div className={styles.tabBar}>
         {['pronosticos', 'tabla', 'miembros'].map(t => (
           <button key={t} className={[styles.tab, tab === t ? styles.tabActive : ''].join(' ')} onClick={() => setTab(t)}>
-            {t === 'pronosticos' ? '✏️ Pronósticos' : t === 'tabla' ? '🏆 Tabla' : '👥 Grupo'}
+            {t === 'pronosticos' ? 'Pronosticos' : t === 'tabla' ? 'Tabla' : 'Grupo'}
           </button>
         ))}
       </div>
@@ -150,17 +171,22 @@ export default function GroupPage() {
         {tab === 'pronosticos' && (
           <>
             <div className={styles.phaseScroll}>
-              {PHASE_ORDER.map(ph => (
-                matches.some(m => m.phase === ph) && (
+              {PHASE_ORDER.map(ph => {
+                const phaseMatches = matches.filter(m => m.phase === ph)
+                if (phaseMatches.length === 0) return null
+                const locked = phaseMatches.every(m => m.status === 'locked')
+                return (
                   <button
                     key={ph}
-                    className={[styles.phaseBtn, phaseFilter === ph ? styles.phaseBtnActive : ''].join(' ')}
-                    onClick={() => setPhaseFilter(ph)}
+                    className={[styles.phaseBtn, phaseFilter === ph ? styles.phaseBtnActive : '', locked ? styles.phaseBtnLocked : ''].join(' ')}
+                    onClick={() => !locked && setPhaseFilter(ph)}
+                    title={locked ? 'Se desbloquea cuando termine la fase anterior' : ''}
                   >
                     <PhaseLabel phase={ph} />
+                    {locked && <span style={{marginLeft:4, fontSize:10}}>🔒</span>}
                   </button>
                 )
-              ))}
+              })}
             </div>
 
             {Object.entries(groupedByGroup).sort(([a], [b]) => a.localeCompare(b)).map(([groupKey, groupMatches]) => (
@@ -170,13 +196,14 @@ export default function GroupPage() {
                   const pred = predictions[match.id] || {}
                   const closed = matchClosed(match)
                   const finished = match.status === 'finished'
+                  const locked = match.status === 'locked'
 
                   let ptsClass = ''
                   let ptsLabel = ''
                   if (finished && pred.points !== undefined) {
-                    if (pred.points === 3) { ptsClass = styles.ptsExact; ptsLabel = '⚡ Exacto · 3 pts' }
-                    else if (pred.points === 1) { ptsClass = styles.ptsResult; ptsLabel = '✓ Resultado · 1 pt' }
-                    else { ptsClass = styles.ptsMiss; ptsLabel = '✗ Sin puntos' }
+                    if (pred.points === 3) { ptsClass = styles.ptsExact; ptsLabel = 'Exacto 3 pts' }
+                    else if (pred.points === 1) { ptsClass = styles.ptsResult; ptsLabel = 'Resultado 1 pt' }
+                    else { ptsClass = styles.ptsMiss; ptsLabel = 'Sin puntos' }
                   }
 
                   return (
@@ -187,15 +214,17 @@ export default function GroupPage() {
                       </div>
                       <div className={styles.matchBody}>
                         <div className={styles.team}>
-                          <span className={styles.flag}>{match.home_flag}</span>
+                          <Flag name={match.home_team} size={40} />
                           <span className={styles.teamName}>{match.home_team}</span>
                         </div>
 
                         <div className={styles.scores}>
-                          {finished ? (
+                          {locked ? (
+                            <div style={{fontSize:24}}>🔒</div>
+                          ) : finished ? (
                             <div className={styles.result}>
                               <span>{match.home_score}</span>
-                              <span className={styles.dash}>–</span>
+                              <span className={styles.dash}>-</span>
                               <span>{match.away_score}</span>
                             </div>
                           ) : (
@@ -206,26 +235,26 @@ export default function GroupPage() {
                                 value={pred.home_score ?? ''}
                                 onChange={e => !closed && handleScoreChange(match.id, 'home_score', e.target.value)}
                                 readOnly={closed}
-                                placeholder="–"
+                                placeholder="-"
                               />
-                              <span className={styles.dash}>–</span>
+                              <span className={styles.dash}>-</span>
                               <input
                                 className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
                                 type="number" min="0" max="20"
                                 value={pred.away_score ?? ''}
                                 onChange={e => !closed && handleScoreChange(match.id, 'away_score', e.target.value)}
                                 readOnly={closed}
-                                placeholder="–"
+                                placeholder="-"
                               />
                             </div>
                           )}
                           {finished && pred.home_score !== undefined && (
-                            <div className={styles.predSub}>Pronosticaste: {pred.home_score}–{pred.away_score}</div>
+                            <div className={styles.predSub}>Pronosticaste: {pred.home_score}-{pred.away_score}</div>
                           )}
                         </div>
 
                         <div className={[styles.team, styles.teamRight].join(' ')}>
-                          <span className={styles.flag}>{match.away_flag}</span>
+                          <Flag name={match.away_team} size={40} />
                           <span className={styles.teamName}>{match.away_team}</span>
                         </div>
                       </div>
@@ -239,7 +268,7 @@ export default function GroupPage() {
             <div className={styles.saveBar}>
               {savedMsg && <span className={styles.savedMsg}>{savedMsg}</span>}
               <Button variant="primary" size="lg" fullWidth loading={saving} onClick={savePredictions}>
-                Guardar pronósticos
+                Guardar pronosticos
               </Button>
             </div>
           </>
@@ -249,7 +278,7 @@ export default function GroupPage() {
           <>
             <div className={styles.lbCard}>
               <div className={styles.lbHeader}>
-                <span>#</span><span>Jugador</span><span>⚡ Exactos</span><span>Pts</span>
+                <span>#</span><span>Jugador</span><span>Exactos</span><span>Pts</span>
               </div>
               {leaderboard.map((row, i) => (
                 <div key={row.user_id} className={[styles.lbRow, row.user_id === user.id ? styles.lbRowMe : ''].join(' ')}>
@@ -260,7 +289,7 @@ export default function GroupPage() {
                     <Avatar name={row.username} color={row.avatar_color} size={30} />
                     <div>
                       <div className={styles.lbName}>{row.username} {row.user_id === user.id && <span className={styles.youChip}>Vos</span>}</div>
-                      <div className={styles.lbSub}>{row.total_predictions} pronóstico{row.total_predictions !== 1 ? 's' : ''}</div>
+                      <div className={styles.lbSub}>{row.total_predictions} pronostico{row.total_predictions !== 1 ? 's' : ''}</div>
                     </div>
                   </div>
                   <span className={styles.lbExact}>{row.exact_scores}</span>
@@ -268,18 +297,18 @@ export default function GroupPage() {
                 </div>
               ))}
             </div>
-            <p className={styles.lbNote}>⚡ Exacto = marcador exacto (3 pts) · ✓ Resultado = ganador/empate (1 pt)</p>
+            <p className={styles.lbNote}>Exacto = marcador exacto (3 pts) · Resultado = ganador/empate (1 pt)</p>
           </>
         )}
 
         {tab === 'miembros' && (
           <>
             <Card className={styles.inviteCard}>
-              <div className={styles.inviteTitle}>Invitá a tus amigos</div>
-              <div className={styles.inviteDesc}>Compartí el código para que se unan al grupo.</div>
+              <div className={styles.inviteTitle}>Invita a tus amigos</div>
+              <div className={styles.inviteDesc}>Compartí el codigo para que se unan al grupo.</div>
               <div className={styles.codeBox}>{group?.code}</div>
               <Button variant="secondary" fullWidth onClick={copyCode}>
-                {copied ? '¡Copiado! 🎉' : 'Copiar código'}
+                {copied ? 'Copiado!' : 'Copiar codigo'}
               </Button>
             </Card>
 
@@ -293,10 +322,10 @@ export default function GroupPage() {
                     <div className={styles.memberInfo}>
                       <div className={styles.memberName}>{m.username}</div>
                       <div className={styles.memberStat}>
-                        {lb?.total_predictions || 0} pronósticos · {lb?.total_points || 0} pts
+                        {lb?.total_predictions || 0} pronosticos · {lb?.total_points || 0} pts
                       </div>
                     </div>
-                    {lb?.exact_scores > 0 && <Badge color="success">⚡ {lb.exact_scores}</Badge>}
+                    {lb?.exact_scores > 0 && <Badge color="success">{lb.exact_scores}</Badge>}
                   </div>
                 )
               })}
@@ -309,7 +338,7 @@ export default function GroupPage() {
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '–'
+  if (!dateStr) return '-'
   const d = new Date(dateStr)
   return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
