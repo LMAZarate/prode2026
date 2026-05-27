@@ -10,11 +10,11 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [phone, setPhone] = useState('')
-
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()
-  const navigate = useNavigate()}
-  const [error, setError] = useState('')
+  const navigate = useNavigate()
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -29,10 +29,10 @@ export default function AuthPage() {
         navigate('/dashboard')
       }
     } catch (err) {
-      const msg = err.message || 'Algo salió mal'
-      if (msg.includes('Invalid login')) setError('Email o contraseña incorrectos.')
-      else if (msg.includes('already registered')) setError('Ese email ya está registrado.')
-      else if (msg.includes('Password should')) setError('La contraseña debe tener al menos 6 caracteres.')
+      const msg = err.message || 'Algo salio mal'
+      if (msg.includes('Invalid login')) setError('Email o contrasena incorrectos.')
+      else if (msg.includes('already registered')) setError('Ese email ya esta registrado.')
+      else if (msg.includes('Password should')) setError('La contrasena debe tener al menos 6 caracteres.')
       else setError(msg)
     } finally {
       setLoading(false)
@@ -44,12 +44,12 @@ export default function AuthPage() {
       <div className={styles.hero}>
         <img src="/logo_jieli.png" alt="Jieli" className={styles.logo} />
         <h1 className={styles.title}>PRODE 2026</h1>
-        <p className={styles.sub}>Mundial USA · Canadá · México</p>
+        <p className={styles.sub}>Mundial USA - Canada - Mexico</p>
       </div>
 
       <Card className={styles.formCard}>
         <div className={styles.tabs}>
-          <button className={[styles.tab, mode === 'login' ? styles.tabActive : ''].join(' ')} onClick={() => { setMode('login'); setError('') }}>Iniciar sesión</button>
+          <button className={[styles.tab, mode === 'login' ? styles.tabActive : ''].join(' ')} onClick={() => { setMode('login'); setError('') }}>Iniciar sesion</button>
           <button className={[styles.tab, mode === 'register' ? styles.tabActive : ''].join(' ')} onClick={() => { setMode('register'); setError('') }}>Crear cuenta</button>
         </div>
 
@@ -57,7 +57,7 @@ export default function AuthPage() {
           {mode === 'register' && (
             <>
               <Input
-                label="Tu nombre (como aparecerá en la tabla)"
+                label="Tu nombre (como aparecera en la tabla)"
                 type="text"
                 placeholder="Ej: Rodrigo M."
                 value={username}
@@ -65,7 +65,7 @@ export default function AuthPage() {
                 required
               />
               <Input
-                label="Teléfono / WhatsApp"
+                label="Telefono / WhatsApp"
                 type="tel"
                 placeholder="Ej: +54 9 351 000 0000"
                 value={phone}
@@ -82,9 +82,9 @@ export default function AuthPage() {
             required
           />
           <Input
-            label="Contraseña"
+            label="Contrasena"
             type="password"
-            placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : '••••••••'}
+            placeholder={mode === 'register' ? 'Minimo 6 caracteres' : '••••••••'}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -97,7 +97,7 @@ export default function AuthPage() {
       </Card>
 
       <p className={styles.footer}>
-        1 pto. por resultado · 3 ptos. por marcador exacto
+        1 pto. por resultado - 3 ptos. por marcador exacto
       </p>
     </div>
   )
