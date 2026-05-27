@@ -9,7 +9,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-  const [error, setError] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ export default function AuthPage() {
         navigate('/dashboard')
       } else {
         if (username.trim().length < 2) { setError('El nombre necesita al menos 2 caracteres.'); setLoading(false); return }
-        await signUp(email, password, username.trim())
+        await signUp(email, password, username.trim(), phone.trim())
         navigate('/dashboard')
       }
     } catch (err) {
@@ -54,14 +54,23 @@ export default function AuthPage() {
 
         <form onSubmit={handleSubmit} className={styles.form}>
           {mode === 'register' && (
-            <Input
-              label="Tu nombre (como aparecerá en la tabla)"
-              type="text"
-              placeholder="Ej: Rodrigo M."
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              required
-            />
+            <>
+              <Input
+                label="Tu nombre (como aparecerá en la tabla)"
+                type="text"
+                placeholder="Ej: Rodrigo M."
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+              />
+              <Input
+                label="Teléfono / WhatsApp"
+                type="tel"
+                placeholder="Ej: +54 9 351 000 0000"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+              />
+            </>
           )}
           <Input
             label="Email"

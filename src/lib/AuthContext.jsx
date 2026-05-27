@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
-  async function signUp(email, password, username) {
+  async function signUp(email, password, username, phone = '') {
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
     if (data.user) {
@@ -39,7 +39,8 @@ export function AuthProvider({ children }) {
       await supabase.from('profiles').insert({
         id: data.user.id,
         username,
-        avatar_color: color
+        avatar_color: color,
+        phone: phone || null
       })
     }
     return data
