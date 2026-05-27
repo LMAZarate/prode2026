@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
@@ -8,44 +8,44 @@ import styles from './Group.module.css'
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
 const COUNTRY_CODES = {
-  'Argentina': 'AR', 'México': 'MX', 'Polonia': 'PL', 'Arabia Saudita': 'SA',
-  'Estados Unidos': 'US', 'Gales': 'GB', 'Inglaterra': 'GB', 'Irán': 'IR',
-  'Senegal': 'SN', 'Países Bajos': 'NL', 'Ecuador': 'EC', 'Qatar': 'QA',
-  'Francia': 'FR', 'Australia': 'AU', 'Dinamarca': 'DK', 'Túnez': 'TN',
-  'Japón': 'JP', 'Costa Rica': 'CR', 'Alemania': 'DE', 'España': 'ES',
-  'Marruecos': 'MA', 'Croacia': 'HR', 'Bélgica': 'BE', 'Canadá': 'CA',
-  'Brasil': 'BR', 'Serbia': 'RS', 'Suiza': 'CH', 'Camerún': 'CM',
-  'Portugal': 'PT', 'Ghana': 'GH', 'Uruguay': 'UY', 'Corea del Sur': 'KR',
-  'Colombia': 'CO', 'Perú': 'PE', 'Argelia': 'DZ', 'Nigeria': 'NG',
-  'Chile': 'CL', 'Irlanda': 'IE', 'Turquía': 'TR',
-  'Egipto': 'EG', 'Nueva Zelanda': 'NZ',
-  'Honduras': 'HN', 'Costa de Marfil': 'CI',
+  'Mexico': 'MX', 'Sudafrica': 'ZA', 'Republica de Corea': 'KR', 'Republica Checa': 'CZ',
+  'Canada': 'CA', 'Bosnia y Herzegovina': 'BA', 'Catar': 'QA', 'Suiza': 'CH',
+  'Brasil': 'BR', 'Marruecos': 'MA', 'Haiti': 'HT', 'Escocia': 'GB',
+  'Estados Unidos': 'US', 'Paraguay': 'PY', 'Australia': 'AU', 'Turquia': 'TR',
+  'Alemania': 'DE', 'Curazao': 'CW', 'Costa de Marfil': 'CI', 'Ecuador': 'EC',
+  'Paises Bajos': 'NL', 'Japon': 'JP', 'Suecia': 'SE', 'Tunez': 'TN',
+  'Belgica': 'BE', 'Egipto': 'EG', 'Iran': 'IR', 'Nueva Zelanda': 'NZ',
+  'Espana': 'ES', 'Cabo Verde': 'CV', 'Arabia Saudi': 'SA', 'Uruguay': 'UY',
+  'Francia': 'FR', 'Senegal': 'SN', 'Irak': 'IQ', 'Noruega': 'NO',
+  'Argentina': 'AR', 'Argelia': 'DZ', 'Austria': 'AT', 'Jordania': 'JO',
+  'Portugal': 'PT', 'RD de Congo': 'CD', 'Uzbekistan': 'UZ', 'Colombia': 'CO',
+  'Inglaterra': 'GB', 'Croacia': 'HR', 'Ghana': 'GH', 'Panama': 'PA',
 }
 
-function Flag({ name, size = 40 }) {
-  const code = COUNTRY_CODES[name]
-  if (!code) return <span style={{fontSize: size * 0.7, lineHeight:1}}>🏆</span>
+function Flag({ name, size }) {
+  size = size || 40
+  var code = COUNTRY_CODES[name]
+  if (!code) return <span style={{ fontSize: size * 0.7 }}>?</span>
   return (
     <img
-      src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`}
+      src={'https://purecatamphetamine.github.io/country-flag-icons/3x2/' + code + '.svg'}
       alt={name}
       style={{ width: size, height: size * 0.67, objectFit: 'cover', borderRadius: 3, display: 'block' }}
-      onError={e => { e.target.style.display = 'none' }}
+      onError={function(e) { e.target.style.display = 'none' }}
     />
   )
 }
 
-function resultSign(home, away) {
-  if (home > away) return 'L'
-  if (home < away) return 'V'
-  return 'E'
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  var d = new Date(dateStr)
+  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 export default function GroupPage() {
   const { id } = useParams()
   const { user, profile } = useAuth()
   const navigate = useNavigate()
-
   const [group, setGroup] = useState(null)
   const [tab, setTab] = useState('pronosticos')
   const [matches, setMatches] = useState([])
@@ -66,22 +66,21 @@ export default function GroupPage() {
       supabase.from('leaderboard').select('*').eq('group_id', id).order('total_points', { ascending: false }),
       supabase.from('group_members').select('user_id, profiles(username, avatar_color)').eq('group_id', id)
     ])
-
     if (groupRes.error) { navigate('/dashboard'); return }
     setGroup(groupRes.data)
     setMatches(matchRes.data || [])
     const predMap = {}
-    predRes.data?.forEach(p => { predMap[p.match_id] = p })
+    if (predRes.data) predRes.data.forEach(function(p) { predMap[p.match_id] = p })
     setPredictions(predMap)
     setLeaderboard(lbRes.data || [])
-    setMembers(memberRes.data?.map(m => m.profiles) || [])
+    setMembers(memberRes.data ? memberRes.data.map(function(m) { return m.profiles }) : [])
     setLoading(false)
   }, [id, user, navigate])
 
   useEffect(() => {
     fetchAll()
-    const channel = supabase.channel(`group-${id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'predictions', filter: `group_id=eq.${id}` }, fetchAll)
+    const channel = supabase.channel('group-' + id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'predictions', filter: 'group_id=eq.' + id }, fetchAll)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'matches' }, fetchAll)
       .subscribe()
     return () => supabase.removeChannel(channel)
@@ -89,10 +88,12 @@ export default function GroupPage() {
 
   function handleScoreChange(matchId, side, val) {
     const num = val === '' ? '' : Math.max(0, Math.min(20, parseInt(val) || 0))
-    setPredictions(prev => ({
-      ...prev,
-      [matchId]: { ...(prev[matchId] || {}), [side]: num }
-    }))
+    setPredictions(function(prev) {
+      const next = Object.assign({}, prev)
+      next[matchId] = Object.assign({}, prev[matchId] || {})
+      next[matchId][side] = num
+      return next
+    })
   }
 
   async function savePredictions() {
@@ -100,14 +101,12 @@ export default function GroupPage() {
     setSavedMsg('')
     const upserts = []
     const now = new Date().toISOString()
-
-    for (const [matchId, pred] of Object.entries(predictions)) {
-      const match = matches.find(m => m.id === parseInt(matchId))
-      if (!match || match.status === 'finished') continue
-      if (match.match_date && new Date(match.match_date) < new Date()) continue
-      if (pred.home_score === '' || pred.away_score === '' ||
-          pred.home_score === undefined || pred.away_score === undefined) continue
-
+    Object.keys(predictions).forEach(function(matchId) {
+      const pred = predictions[matchId]
+      const match = matches.find(function(m) { return m.id === parseInt(matchId) })
+      if (!match || match.status === 'finished' || match.status === 'locked') return
+      if (match.match_date && new Date(match.match_date) < new Date()) return
+      if (pred.home_score === '' || pred.away_score === '' || pred.home_score === undefined || pred.away_score === undefined) return
       upserts.push({
         user_id: user.id,
         group_id: id,
@@ -116,227 +115,210 @@ export default function GroupPage() {
         away_score: parseInt(pred.away_score),
         updated_at: now
       })
-    }
-
+    })
     if (upserts.length === 0) {
-      setSavedMsg('No hay pronosticos nuevos para guardar.')
+      setSavedMsg('No hay pronosticos para guardar.')
       setSaving(false)
       return
     }
-
-    const { error } = await supabase.from('predictions').upsert(upserts, {
-      onConflict: 'user_id,group_id,match_id'
-    })
-
-    if (error) setSavedMsg('Error al guardar. Intenta de nuevo.')
-    else { setSavedMsg(`✓ ${upserts.length} pronostico${upserts.length > 1 ? 's' : ''} guardado${upserts.length > 1 ? 's' : ''}`) }
+    const res = await supabase.from('predictions').upsert(upserts, { onConflict: 'user_id,group_id,match_id' })
+    if (res.error) setSavedMsg('Error al guardar.')
+    else setSavedMsg('Guardado! ' + upserts.length + ' pronostico' + (upserts.length > 1 ? 's' : ''))
     setSaving(false)
-    setTimeout(() => setSavedMsg(''), 3000)
+    setTimeout(function() { setSavedMsg('') }, 3000)
   }
 
   function copyCode() {
-    navigator.clipboard.writeText(group?.code || '')
+    navigator.clipboard.writeText(group ? group.code : '')
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(function() { setCopied(false) }, 2000)
   }
 
-  const filteredMatches = matches.filter(m => m.phase === phaseFilter)
+  function matchClosed(m) {
+    return m.status === 'finished' || m.status === 'locked' || (m.match_date && new Date(m.match_date) < new Date())
+  }
+
+  const filteredMatches = matches.filter(function(m) { return m.phase === phaseFilter })
   const groupedByGroup = {}
-  filteredMatches.forEach(m => {
+  filteredMatches.forEach(function(m) {
     const key = m.group_name || 'Eliminatorias'
     if (!groupedByGroup[key]) groupedByGroup[key] = []
     groupedByGroup[key].push(m)
   })
-
-  const matchClosed = (m) => m.status === 'finished' || (m.match_date && new Date(m.match_date) < new Date())
 
   if (loading) return <div className={styles.center}><Spinner size={32} /></div>
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <button className={styles.back} onClick={() => navigate('/dashboard')}>Grupos</button>
+        <button className={styles.back} onClick={function() { navigate('/dashboard') }}>Grupos</button>
         <div className={styles.headerCenter}>
-          <div className={styles.groupName}>{group?.name}</div>
-          <div className={styles.groupCode} onClick={copyCode} title="Copiar codigo">
-            {copied ? 'Copiado!' : `Codigo: ${group?.code}`}
+          <div className={styles.groupName}>{group ? group.name : ''}</div>
+          <div className={styles.groupCode} onClick={copyCode}>
+            {copied ? 'Copiado!' : 'Codigo: ' + (group ? group.code : '')}
           </div>
         </div>
-        <Avatar name={profile?.username || ''} color={profile?.avatar_color} size={32} />
+        <Avatar name={profile ? profile.username : ''} color={profile ? profile.avatar_color : 'blue'} size={32} />
       </header>
 
       <div className={styles.tabBar}>
-        {['pronosticos', 'tabla', 'miembros'].map(t => (
-          <button key={t} className={[styles.tab, tab === t ? styles.tabActive : ''].join(' ')} onClick={() => setTab(t)}>
-            {t === 'pronosticos' ? 'Pronosticos' : t === 'tabla' ? 'Tabla' : 'Grupo'}
-          </button>
-        ))}
+        <button className={tab === 'pronosticos' ? styles.tab + ' ' + styles.tabActive : styles.tab} onClick={function() { setTab('pronosticos') }}>Pronosticos</button>
+        <button className={tab === 'tabla' ? styles.tab + ' ' + styles.tabActive : styles.tab} onClick={function() { setTab('tabla') }}>Tabla</button>
+        <button className={tab === 'miembros' ? styles.tab + ' ' + styles.tabActive : styles.tab} onClick={function() { setTab('miembros') }}>Grupo</button>
       </div>
 
       <main className={styles.main}>
         {tab === 'pronosticos' && (
-          <>
+          <div>
             <div className={styles.phaseScroll}>
-              {PHASE_ORDER.map(ph => (
-                matches.some(m => m.phase === ph) && (
-                  <button
-                    key={ph}
-                    className={[styles.phaseBtn, phaseFilter === ph ? styles.phaseBtnActive : ''].join(' ')}
-                    onClick={() => setPhaseFilter(ph)}
-                  >
+              {PHASE_ORDER.map(function(ph) {
+                const phaseMatches = matches.filter(function(m) { return m.phase === ph })
+                if (phaseMatches.length === 0) return null
+                const locked = phaseMatches.every(function(m) { return m.status === 'locked' })
+                let cls = styles.phaseBtn
+                if (phaseFilter === ph) cls = cls + ' ' + styles.phaseBtnActive
+                if (locked) cls = cls + ' ' + styles.phaseBtnLocked
+                return (
+                  <button key={ph} className={cls} onClick={function() { if (!locked) setPhaseFilter(ph) }}>
                     <PhaseLabel phase={ph} />
+                    {locked && <span style={{ marginLeft: 4, fontSize: 10 }}>lock</span>}
                   </button>
                 )
-              ))}
+              })}
             </div>
 
-            {Object.entries(groupedByGroup).sort(([a], [b]) => a.localeCompare(b)).map(([groupKey, groupMatches]) => (
-              <div key={groupKey}>
-                {phaseFilter === 'group' && <div className={styles.groupHeader}>Grupo {groupKey}</div>}
-                {groupMatches.map(match => {
-                  const pred = predictions[match.id] || {}
-                  const closed = matchClosed(match)
-                  const finished = match.status === 'finished'
-
-                  let ptsClass = ''
-                  let ptsLabel = ''
-                  if (finished && pred.points !== undefined) {
-                    if (pred.points === 3) { ptsClass = styles.ptsExact; ptsLabel = 'Exacto 3 pts' }
-                    else if (pred.points === 1) { ptsClass = styles.ptsResult; ptsLabel = 'Resultado 1 pt' }
-                    else { ptsClass = styles.ptsMiss; ptsLabel = 'Sin puntos' }
-                  }
-
-                  return (
-                    <Card key={match.id} className={[styles.matchCard, closed ? styles.matchClosed : ''].join(' ')}>
-                      <div className={styles.matchMeta}>
-                        <span>{formatDate(match.match_date)}</span>
-                        <span>{match.city}</span>
-                      </div>
-                      <div className={styles.matchBody}>
-                        <div className={styles.team}>
-                          <Flag name={match.home_team} size={40} />
-                          <span className={styles.teamName}>{match.home_team}</span>
+            {Object.keys(groupedByGroup).sort().map(function(groupKey) {
+              return (
+                <div key={groupKey}>
+                  {phaseFilter === 'group' && <div className={styles.groupHeader}>Grupo {groupKey}</div>}
+                  {groupedByGroup[groupKey].map(function(match) {
+                    const pred = predictions[match.id] || {}
+                    const closed = matchClosed(match)
+                    const finished = match.status === 'finished'
+                    const isLocked = match.status === 'locked'
+                    let ptsLabel = ''
+                    let ptsClass = ''
+                    if (finished && pred.points !== undefined) {
+                      if (pred.points === 3) { ptsClass = styles.ptsExact; ptsLabel = 'Exacto 3 pts' }
+                      else if (pred.points === 1) { ptsClass = styles.ptsResult; ptsLabel = 'Resultado 1 pt' }
+                      else { ptsClass = styles.ptsMiss; ptsLabel = 'Sin puntos' }
+                    }
+                    return (
+                      <Card key={match.id} className={closed ? styles.matchCard + ' ' + styles.matchClosed : styles.matchCard}>
+                        <div className={styles.matchMeta}>
+                          <span>{formatDate(match.match_date)}</span>
+                          <span>{match.city}</span>
                         </div>
-
-                        <div className={styles.scores}>
-                          {finished ? (
-                            <div className={styles.result}>
-                              <span>{match.home_score}</span>
-                              <span className={styles.dash}>-</span>
-                              <span>{match.away_score}</span>
-                            </div>
-                          ) : (
-                            <div className={styles.inputs}>
-                              <input
-                                className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
-                                type="number" min="0" max="20"
-                                value={pred.home_score ?? ''}
-                                onChange={e => !closed && handleScoreChange(match.id, 'home_score', e.target.value)}
-                                readOnly={closed}
-                                placeholder="-"
-                              />
-                              <span className={styles.dash}>-</span>
-                              <input
-                                className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
-                                type="number" min="0" max="20"
-                                value={pred.away_score ?? ''}
-                                onChange={e => !closed && handleScoreChange(match.id, 'away_score', e.target.value)}
-                                readOnly={closed}
-                                placeholder="-"
-                              />
-                            </div>
-                          )}
-                          {finished && pred.home_score !== undefined && (
-                            <div className={styles.predSub}>Pronosticaste: {pred.home_score}-{pred.away_score}</div>
-                          )}
+                        <div className={styles.matchBody}>
+                          <div className={styles.team}>
+                            <Flag name={match.home_team} size={40} />
+                            <span className={styles.teamName}>{match.home_team}</span>
+                          </div>
+                          <div className={styles.scores}>
+                            {isLocked ? (
+                              <div style={{ fontSize: 20 }}>-</div>
+                            ) : finished ? (
+                              <div className={styles.result}>
+                                <span>{match.home_score}</span>
+                                <span className={styles.dash}>-</span>
+                                <span>{match.away_score}</span>
+                              </div>
+                            ) : (
+                              <div className={styles.inputs}>
+                                <input
+                                  className={closed ? styles.scoreInput + ' ' + styles.scoreInputClosed : styles.scoreInput}
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  value={pred.home_score !== undefined ? pred.home_score : 0}
+                                  onChange={function(e) { if (!closed) handleScoreChange(match.id, 'home_score', e.target.value) }}
+                                  readOnly={closed}
+                                />
+                                <span className={styles.dash}>-</span>
+                                <input
+                                  className={closed ? styles.scoreInput + ' ' + styles.scoreInputClosed : styles.scoreInput}
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  value={pred.away_score !== undefined ? pred.away_score : 0}
+                                  onChange={function(e) { if (!closed) handleScoreChange(match.id, 'away_score', e.target.value) }}
+                                  readOnly={closed}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className={styles.team}>
+                            <Flag name={match.away_team} size={40} />
+                            <span className={styles.teamName}>{match.away_team}</span>
+                          </div>
                         </div>
-
-                        <div className={[styles.team, styles.teamRight].join(' ')}>
-                          <Flag name={match.away_team} size={40} />
-                          <span className={styles.teamName}>{match.away_team}</span>
-                        </div>
-                      </div>
-                      {ptsLabel && <div className={[styles.pts, ptsClass].join(' ')}>{ptsLabel}</div>}
-                    </Card>
-                  )
-                })}
-              </div>
-            ))}
+                        {ptsLabel && <div className={ptsClass}>{ptsLabel}</div>}
+                      </Card>
+                    )
+                  })}
+                </div>
+              )
+            })}
 
             <div className={styles.saveBar}>
               {savedMsg && <span className={styles.savedMsg}>{savedMsg}</span>}
-              <Button variant="primary" size="lg" fullWidth loading={saving} onClick={savePredictions}>
-                Guardar pronosticos
-              </Button>
+              <Button variant="primary" size="lg" fullWidth loading={saving} onClick={savePredictions}>Guardar pronosticos</Button>
             </div>
-          </>
+          </div>
         )}
 
         {tab === 'tabla' && (
-          <>
+          <div>
             <div className={styles.lbCard}>
               <div className={styles.lbHeader}>
                 <span>#</span><span>Jugador</span><span>Exactos</span><span>Pts</span>
               </div>
-              {leaderboard.map((row, i) => (
-                <div key={row.user_id} className={[styles.lbRow, row.user_id === user.id ? styles.lbRowMe : ''].join(' ')}>
-                  <span className={styles.lbPos}>
-                    {i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : i + 1}
-                  </span>
-                  <div className={styles.lbUser}>
-                    <Avatar name={row.username} color={row.avatar_color} size={30} />
-                    <div>
-                      <div className={styles.lbName}>{row.username} {row.user_id === user.id && <span className={styles.youChip}>Vos</span>}</div>
-                      <div className={styles.lbSub}>{row.total_predictions} pronostico{row.total_predictions !== 1 ? 's' : ''}</div>
+              {leaderboard.map(function(row, i) {
+                return (
+                  <div key={row.user_id} className={row.user_id === user.id ? styles.lbRow + ' ' + styles.lbRowMe : styles.lbRow}>
+                    <span className={styles.lbPos}>{i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : i + 1}</span>
+                    <div className={styles.lbUser}>
+                      <Avatar name={row.username} color={row.avatar_color} size={30} />
+                      <div>
+                        <div className={styles.lbName}>{row.username} {row.user_id === user.id && <span className={styles.youChip}>Vos</span>}</div>
+                        <div className={styles.lbSub}>{row.total_predictions} pronosticos</div>
+                      </div>
                     </div>
+                    <span className={styles.lbExact}>{row.exact_scores}</span>
+                    <span className={styles.lbPts}>{row.total_points}</span>
                   </div>
-                  <span className={styles.lbExact}>{row.exact_scores}</span>
-                  <span className={styles.lbPts}>{row.total_points}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
-            <p className={styles.lbNote}>Exacto = marcador exacto (3 pts) · Resultado = ganador/empate (1 pt)</p>
-          </>
+          </div>
         )}
 
         {tab === 'miembros' && (
-          <>
+          <div>
             <Card className={styles.inviteCard}>
               <div className={styles.inviteTitle}>Invita a tus amigos</div>
               <div className={styles.inviteDesc}>Compartí el codigo para que se unan al grupo.</div>
-              <div className={styles.codeBox}>{group?.code}</div>
-              <Button variant="secondary" fullWidth onClick={copyCode}>
-                {copied ? 'Copiado!' : 'Copiar codigo'}
-              </Button>
+              <div className={styles.codeBox}>{group ? group.code : ''}</div>
+              <Button variant="secondary" fullWidth onClick={copyCode}>{copied ? 'Copiado!' : 'Copiar codigo'}</Button>
             </Card>
-
             <div className={styles.memberList}>
-              <div className={styles.memberListTitle}>{members.length} participante{members.length !== 1 ? 's' : ''}</div>
-              {members.map(m => {
-                const lb = leaderboard.find(l => l.username === m.username)
+              <div className={styles.memberListTitle}>{members.length} participantes</div>
+              {members.map(function(m) {
+                const lb = leaderboard.find(function(l) { return l.username === m.username })
                 return (
                   <div key={m.username} className={styles.memberRow}>
                     <Avatar name={m.username} color={m.avatar_color} size={36} />
                     <div className={styles.memberInfo}>
                       <div className={styles.memberName}>{m.username}</div>
-                      <div className={styles.memberStat}>
-                        {lb?.total_predictions || 0} pronosticos · {lb?.total_points || 0} pts
-                      </div>
+                      <div className={styles.memberStat}>{lb ? lb.total_predictions : 0} pronosticos - {lb ? lb.total_points : 0} pts</div>
                     </div>
-                    {lb?.exact_scores > 0 && <Badge color="success">{lb.exact_scores}</Badge>}
                   </div>
                 )
               })}
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>
   )
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
