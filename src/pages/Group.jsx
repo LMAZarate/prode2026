@@ -8,18 +8,18 @@ import styles from './Group.module.css'
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
 const COUNTRY_CODES = {
-  'Argentina': 'AR', 'Mexico': 'MX', 'Polonia': 'PL', 'Arabia Saudita': 'SA',
-  'Estados Unidos': 'US', 'Gales': 'GB', 'Inglaterra': 'GB', 'Iran': 'IR',
-  'Senegal': 'SN', 'Paises Bajos': 'NL', 'Ecuador': 'EC', 'Qatar': 'QA',
-  'Francia': 'FR', 'Australia': 'AU', 'Dinamarca': 'DK', 'Tunez': 'TN',
-  'Japon': 'JP', 'Costa Rica': 'CR', 'Alemania': 'DE', 'Espana': 'ES',
-  'Marruecos': 'MA', 'Croacia': 'HR', 'Belgica': 'BE', 'Canada': 'CA',
-  'Brasil': 'BR', 'Serbia': 'RS', 'Suiza': 'CH', 'Camerun': 'CM',
-  'Portugal': 'PT', 'Ghana': 'GH', 'Uruguay': 'UY', 'Corea del Sur': 'KR',
-  'Colombia': 'CO', 'Peru': 'PE', 'Argelia': 'DZ', 'Nigeria': 'NG',
-  'Chile': 'CL', 'Irlanda': 'IE', 'Turquia': 'TR',
-  'Egipto': 'EG', 'Nueva Zelanda': 'NZ',
-  'Honduras': 'HN', 'Costa de Marfil': 'CI',
+  'Mexico': 'MX', 'Sudafrica': 'ZA', 'Republica de Corea': 'KR', 'Republica Checa': 'CZ',
+  'Canada': 'CA', 'Bosnia y Herzegovina': 'BA', 'Catar': 'QA', 'Suiza': 'CH',
+  'Brasil': 'BR', 'Marruecos': 'MA', 'Haiti': 'HT', 'Escocia': 'GB',
+  'Estados Unidos': 'US', 'Paraguay': 'PY', 'Australia': 'AU', 'Turquia': 'TR',
+  'Alemania': 'DE', 'Curazao': 'CW', 'Costa de Marfil': 'CI', 'Ecuador': 'EC',
+  'Paises Bajos': 'NL', 'Japon': 'JP', 'Suecia': 'SE', 'Tunez': 'TN',
+  'Belgica': 'BE', 'Egipto': 'EG', 'Iran': 'IR', 'Nueva Zelanda': 'NZ',
+  'Espana': 'ES', 'Cabo Verde': 'CV', 'Arabia Saudi': 'SA', 'Uruguay': 'UY',
+  'Francia': 'FR', 'Senegal': 'SN', 'Irak': 'IQ', 'Noruega': 'NO',
+  'Argentina': 'AR', 'Argelia': 'DZ', 'Austria': 'AT', 'Jordania': 'JO',
+  'Portugal': 'PT', 'RD de Congo': 'CD', 'Uzbekistan': 'UZ', 'Colombia': 'CO',
+  'Inglaterra': 'GB', 'Croacia': 'HR', 'Ghana': 'GH', 'Panama': 'PA',
 }
 
 function Flag({ name, size = 40 }) {
@@ -242,103 +242,3 @@ export default function GroupPage() {
                                 className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
                                 type="number" min="0" max="20"
                                 value={pred.away_score ?? ''}
-                                onChange={e => !closed && handleScoreChange(match.id, 'away_score', e.target.value)}
-                                readOnly={closed}
-                                placeholder="-"
-                              />
-                            </div>
-                          )}
-                          {finished && pred.home_score !== undefined && (
-                            <div className={styles.predSub}>Pronosticaste: {pred.home_score}-{pred.away_score}</div>
-                          )}
-                        </div>
-
-                        <div className={[styles.team, styles.teamRight].join(' ')}>
-                          <Flag name={match.away_team} size={40} />
-                          <span className={styles.teamName}>{match.away_team}</span>
-                        </div>
-                      </div>
-                      {ptsLabel && <div className={[styles.pts, ptsClass].join(' ')}>{ptsLabel}</div>}
-                    </Card>
-                  )
-                })}
-              </div>
-            ))}
-
-            <div className={styles.saveBar}>
-              {savedMsg && <span className={styles.savedMsg}>{savedMsg}</span>}
-              <Button variant="primary" size="lg" fullWidth loading={saving} onClick={savePredictions}>
-                Guardar pronosticos
-              </Button>
-            </div>
-          </>
-        )}
-
-        {tab === 'tabla' && (
-          <>
-            <div className={styles.lbCard}>
-              <div className={styles.lbHeader}>
-                <span>#</span><span>Jugador</span><span>Exactos</span><span>Pts</span>
-              </div>
-              {leaderboard.map((row, i) => (
-                <div key={row.user_id} className={[styles.lbRow, row.user_id === user.id ? styles.lbRowMe : ''].join(' ')}>
-                  <span className={styles.lbPos}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
-                  </span>
-                  <div className={styles.lbUser}>
-                    <Avatar name={row.username} color={row.avatar_color} size={30} />
-                    <div>
-                      <div className={styles.lbName}>{row.username} {row.user_id === user.id && <span className={styles.youChip}>Vos</span>}</div>
-                      <div className={styles.lbSub}>{row.total_predictions} pronostico{row.total_predictions !== 1 ? 's' : ''}</div>
-                    </div>
-                  </div>
-                  <span className={styles.lbExact}>{row.exact_scores}</span>
-                  <span className={styles.lbPts}>{row.total_points}</span>
-                </div>
-              ))}
-            </div>
-            <p className={styles.lbNote}>Exacto = marcador exacto (3 pts) · Resultado = ganador/empate (1 pt)</p>
-          </>
-        )}
-
-        {tab === 'miembros' && (
-          <>
-            <Card className={styles.inviteCard}>
-              <div className={styles.inviteTitle}>Invita a tus amigos</div>
-              <div className={styles.inviteDesc}>Compartí el codigo para que se unan al grupo.</div>
-              <div className={styles.codeBox}>{group?.code}</div>
-              <Button variant="secondary" fullWidth onClick={copyCode}>
-                {copied ? 'Copiado!' : 'Copiar codigo'}
-              </Button>
-            </Card>
-
-            <div className={styles.memberList}>
-              <div className={styles.memberListTitle}>{members.length} participante{members.length !== 1 ? 's' : ''}</div>
-              {members.map(m => {
-                const lb = leaderboard.find(l => l.username === m.username)
-                return (
-                  <div key={m.username} className={styles.memberRow}>
-                    <Avatar name={m.username} color={m.avatar_color} size={36} />
-                    <div className={styles.memberInfo}>
-                      <div className={styles.memberName}>{m.username}</div>
-                      <div className={styles.memberStat}>
-                        {lb?.total_predictions || 0} pronosticos · {lb?.total_points || 0} pts
-                      </div>
-                    </div>
-                    {lb?.exact_scores > 0 && <Badge color="success">{lb.exact_scores}</Badge>}
-                  </div>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </main>
-    </div>
-  )
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-}
