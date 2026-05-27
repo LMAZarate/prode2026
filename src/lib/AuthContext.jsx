@@ -6,14 +6,6 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
-import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-
-const AuthContext = createContext(null)
-
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -22,13 +14,11 @@ export function AuthProvider({ children }) {
       if (session?.user) fetchProfile(session.user.id)
       else setLoading(false)
     })
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
       else { setProfile(null); setLoading(false) }
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
@@ -44,12 +34,7 @@ export function AuthProvider({ children }) {
     if (data.user) {
       const colors = ['blue', 'teal', 'purple', 'coral', 'amber', 'green']
       const color = colors[Math.floor(Math.random() * colors.length)]
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        username,
-        avatar_color: color,
-        phone: phone || null
-      })
+      await supabase.from('profiles').insert({ id: data.user.id, username, avatar_color: color, phone: phone || null })
     }
     return data
   }
