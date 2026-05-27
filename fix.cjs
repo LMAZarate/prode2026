@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+const fs = require('fs')
+
+fs.writeFileSync('src/pages/Group.jsx', `import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
@@ -207,3 +209,5 @@ export default function GroupPage() {
     </div>
   )
 }
+`, 'utf8')
+console.log('OK')
