@@ -8,10 +8,10 @@
   --c-text: #1a1a18;
   --c-text-muted: #6b6b68;
   --c-text-hint: #a0a09c;
-  --c-accent: #1a1a18;
+  --c-accent: #00b843;
   --c-accent-text: #ffffff;
-  --c-success-bg: #eaf3de;
-  --c-success: #3B6D11;
+  --c-success-bg: #d6f5e3;
+  --c-success: #007a2c;
   --c-info-bg: #e6f1fb;
   --c-info: #185FA5;
   --c-amber-bg: #FAEEDA;
@@ -33,10 +33,10 @@
     --c-text: #f0f0ec;
     --c-text-muted: #9a9a96;
     --c-text-hint: #636360;
-    --c-accent: #f0f0ec;
-    --c-accent-text: #141412;
-    --c-success-bg: #173404;
-    --c-success: #97C459;
+    --c-accent: #00b843;
+    --c-accent-text: #ffffff;
+    --c-success-bg: #003d1a;
+    --c-success: #4cd97a;
     --c-info-bg: #042C53;
     --c-info: #85B7EB;
     --c-amber-bg: #412402;

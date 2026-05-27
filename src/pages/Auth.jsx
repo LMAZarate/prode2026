@@ -41,7 +41,7 @@ export default function AuthPage() {
   return (
     <div className={styles.page}>
       <div className={styles.hero}>
-        <div className={styles.worldcup}>⚽</div>
+        <img src="/logo_jieli.png" alt="Jieli" className={styles.logo} />
         <h1 className={styles.title}>PRODE 2026</h1>
         <p className={styles.sub}>Mundial USA · Canadá · México</p>
       </div>

@@ -8,7 +8,7 @@ import styles from './Dashboard.module.css'
 export default function Dashboard() {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
-  const [myGroups, setMyGroups] = useState([])
+  const isAdmin = user?.id === '7af28f93-2fde-4767-a74a-d06a44d26aed'
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
@@ -85,7 +85,7 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.logo}>⚽ PRODE 2026</div>
+        <div className={styles.logo}><img src="/logo_jieli.png" alt="Jieli" style={{height:28,width:'auto'}} /> <span>PRODE 2026</span></div>
         <div className={styles.userMenu}>
           <Avatar name={profile?.username || ''} color={profile?.avatar_color} size={32} />
           <span className={styles.userName}>{profile?.username}</span>
@@ -100,7 +100,7 @@ export default function Dashboard() {
         </div>
 
         <div className={styles.actions}>
-          <Button variant="primary" onClick={() => { setCreateOpen(true); setJoinOpen(false); setActionError('') }}>+ Crear grupo</Button>
+          {isAdmin && <Button variant="primary" onClick={() => { setCreateOpen(true); setJoinOpen(false); setActionError('') }}>+ Crear grupo</Button>}
           <Button variant="secondary" onClick={() => { setJoinOpen(true); setCreateOpen(false); setActionError('') }}>Unirme a un grupo</Button>
         </div>
 

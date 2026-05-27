@@ -7,6 +7,34 @@ import styles from './Group.module.css'
 
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
+const COUNTRY_CODES = {
+  'Argentina': 'ar', 'México': 'mx', 'Polonia': 'pl', 'Arabia Saudita': 'sa',
+  'Estados Unidos': 'us', 'Gales': 'gb-wls', 'Inglaterra': 'gb-eng', 'Irán': 'ir',
+  'Senegal': 'sn', 'Países Bajos': 'nl', 'Ecuador': 'ec', 'Qatar': 'qa',
+  'Francia': 'fr', 'Australia': 'au', 'Dinamarca': 'dk', 'Túnez': 'tn',
+  'Japón': 'jp', 'Costa Rica': 'cr', 'Alemania': 'de', 'España': 'es',
+  'Marruecos': 'ma', 'Croacia': 'hr', 'Bélgica': 'be', 'Canadá': 'ca',
+  'Brasil': 'br', 'Serbia': 'rs', 'Suiza': 'ch', 'Camerún': 'cm',
+  'Portugal': 'pt', 'Ghana': 'gh', 'Uruguay': 'uy', 'Corea del Sur': 'kr',
+  'Colombia': 'co', 'Perú': 'pe', 'Argelia': 'dz', 'Nigeria': 'ng',
+  'Chile': 'cl', 'Irlanda': 'ie', 'Turquía': 'tr',
+  'Egipto': 'eg', 'Nueva Zelanda': 'nz', 'Australia': 'au',
+  'Honduras': 'hn', 'Costa de Marfil': 'ci',
+}
+
+function Flag({ name, size = 32 }) {
+  const code = COUNTRY_CODES[name]
+  if (!code) return <span style={{fontSize: size * 0.7, lineHeight:1}}>🏆</span>
+  return (
+    <img
+      src={`https://flagcdn.com/w${size * 2}/${code}.png`}
+      alt={name}
+      style={{ width: size, height: size * 0.67, objectFit: 'cover', borderRadius: 3, display: 'block' }}
+      onError={e => { e.target.style.display = 'none' }}
+    />
+  )
+}
+
 function resultSign(home, away) {
   if (home > away) return 'L'
   if (home < away) return 'V'
@@ -130,7 +158,7 @@ export default function GroupPage() {
       <header className={styles.header}>
         <button className={styles.back} onClick={() => navigate('/dashboard')}>‹ Grupos</button>
         <div className={styles.headerCenter}>
-          <div className={styles.groupName}>{group?.name}</div>
+          <div className={styles.groupName}><img src="/logo_jieli.png" alt="Jieli" style={{height:20,width:'auto',verticalAlign:'middle',marginRight:6}} />{group?.name}</div>
           <div className={styles.groupCode} onClick={copyCode} title="Copiar código">
             {copied ? '¡Copiado!' : `Código: ${group?.code}`}
           </div>
@@ -187,7 +215,7 @@ export default function GroupPage() {
                       </div>
                       <div className={styles.matchBody}>
                         <div className={styles.team}>
-                          <span className={styles.flag}>{match.home_flag}</span>
+                          <Flag name={match.home_team} size={40} />
                           <span className={styles.teamName}>{match.home_team}</span>
                         </div>
 
@@ -225,7 +253,7 @@ export default function GroupPage() {
                         </div>
 
                         <div className={[styles.team, styles.teamRight].join(' ')}>
-                          <span className={styles.flag}>{match.away_flag}</span>
+                          <Flag name={match.away_team} size={40} />
                           <span className={styles.teamName}>{match.away_team}</span>
                         </div>
                       </div>

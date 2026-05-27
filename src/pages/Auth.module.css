@@ -9,7 +9,7 @@
 }
 
 .hero { text-align: center; }
-.worldcup { font-size: 52px; line-height: 1; margin-bottom: .5rem; }
+.logo { height: 60px; width: auto; margin-bottom: .75rem; }
 .title { font-size: 28px; font-weight: 700; letter-spacing: -.02em; color: var(--c-text); }
 .sub { font-size: 14px; color: var(--c-text-muted); margin-top: 4px; }
 
