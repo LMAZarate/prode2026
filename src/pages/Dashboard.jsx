@@ -9,6 +9,7 @@ export default function Dashboard() {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
   const isAdmin = user?.id === '7af28f93-2fde-4767-a74a-d06a44d26aed'
+  const [myGroups, setMyGroups] = useState([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
