@@ -232,7 +232,7 @@ export default function GroupPage() {
                               <input
                                 className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
                                 type="number" min="0" max="20"
-                                value={pred.home_score ?? ''}
+                                value={pred.home_score !== undefined && pred.home_score !== null ? pred.home_score : ''}
                                 onChange={e => !closed && handleScoreChange(match.id, 'home_score', e.target.value)}
                                 readOnly={closed}
                                 placeholder="-"
@@ -241,4 +241,4 @@ export default function GroupPage() {
                               <input
                                 className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
                                 type="number" min="0" max="20"
-                                value={pred.away_score ?? ''}
+                                value={pred.away_score !== undefined && pred.away_score !== null ? pred.away_score : ''}
