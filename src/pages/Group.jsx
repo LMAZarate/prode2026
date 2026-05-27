@@ -252,3 +252,84 @@ export default function GroupPage() {
     placeholder="-"
   />
 </div>
+                          <div className={styles.team}>
+                            <Flag name={match.away_team} size={40} />
+                            <span className={styles.teamName}>{match.away_team}</span>
+                          </div>
+                        </div>
+                        {ptsLabel && <div className={ptsClass}>{ptsLabel}</div>}
+                      </Card>
+                    )
+                  })}
+                </div>
+              )
+            })}
+
+            <div className={styles.saveBar}>
+              {savedMsg && <span className={styles.savedMsg}>{savedMsg}</span>}
+              <Button variant="primary" size="lg" fullWidth loading={saving} onClick={savePredictions}>Guardar pronosticos</Button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'tabla' && (
+          <div>
+            <div className={styles.lbCard}>
+              <div className={styles.lbHeader}>
+                <span>#</span><span>Jugador</span><span>Exactos</span><span>Pts</span>
+              </div>
+              {leaderboard.map(function(row, i) {
+                return (
+                  <div key={row.user_id} className={row.user_id === user.id ? styles.lbRow + ' ' + styles.lbRowMe : styles.lbRow}>
+                    <span className={styles.lbPos}>{i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : i + 1}</span>
+                    <div className={styles.lbUser}>
+                      <Avatar name={row.username} color={row.avatar_color} size={30} />
+                      <div>
+                        <div className={styles.lbName}>{row.username} {row.user_id === user.id && <span className={styles.youChip}>Vos</span>}</div>
+                        <div className={styles.lbSub}>{row.total_predictions} pronosticos</div>
+                      </div>
+                    </div>
+                    <span className={styles.lbExact}>{row.exact_scores}</span>
+                    <span className={styles.lbPts}>{row.total_points}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {tab === 'miembros' && (
+          <div>
+            <Card className={styles.inviteCard}>
+              <div className={styles.inviteTitle}>Invita a tus amigos</div>
+              <div className={styles.inviteDesc}>Compartí el codigo para que se unan al grupo.</div>
+              <div className={styles.codeBox}>{group ? group.code : ''}</div>
+              <Button variant="secondary" fullWidth onClick={copyCode}>{copied ? 'Copiado!' : 'Copiar codigo'}</Button>
+            </Card>
+            <div className={styles.memberList}>
+              <div className={styles.memberListTitle}>{members.length} participantes</div>
+              {members.map(function(m) {
+                var lb = leaderboard.find(function(l) { return l.username === m.username })
+                return (
+                  <div key={m.username} className={styles.memberRow}>
+                    <Avatar name={m.username} color={m.avatar_color} size={36} />
+                    <div className={styles.memberInfo}>
+                      <div className={styles.memberName}>{m.username}</div>
+                      <div className={styles.memberStat}>{lb ? lb.total_predictions : 0} pronosticos - {lb ? lb.total_points : 0} pts</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  var d = new Date(dateStr)
+  return d.toLocaleDateString('es-AR', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})
+}
