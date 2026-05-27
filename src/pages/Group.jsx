@@ -8,26 +8,26 @@ import styles from './Group.module.css'
 const PHASE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', '3rd', 'final']
 
 const COUNTRY_CODES = {
-  'Argentina': 'ar', 'México': 'mx', 'Polonia': 'pl', 'Arabia Saudita': 'sa',
-  'Estados Unidos': 'us', 'Gales': 'gb-wls', 'Inglaterra': 'gb-eng', 'Irán': 'ir',
-  'Senegal': 'sn', 'Países Bajos': 'nl', 'Ecuador': 'ec', 'Qatar': 'qa',
-  'Francia': 'fr', 'Australia': 'au', 'Dinamarca': 'dk', 'Túnez': 'tn',
-  'Japón': 'jp', 'Costa Rica': 'cr', 'Alemania': 'de', 'España': 'es',
-  'Marruecos': 'ma', 'Croacia': 'hr', 'Bélgica': 'be', 'Canadá': 'ca',
-  'Brasil': 'br', 'Serbia': 'rs', 'Suiza': 'ch', 'Camerún': 'cm',
-  'Portugal': 'pt', 'Ghana': 'gh', 'Uruguay': 'uy', 'Corea del Sur': 'kr',
-  'Colombia': 'co', 'Perú': 'pe', 'Argelia': 'dz', 'Nigeria': 'ng',
-  'Chile': 'cl', 'Irlanda': 'ie', 'Turquía': 'tr',
-  'Egipto': 'eg', 'Nueva Zelanda': 'nz', 'Australia': 'au',
-  'Honduras': 'hn', 'Costa de Marfil': 'ci',
+  'Argentina': 'AR', 'México': 'MX', 'Polonia': 'PL', 'Arabia Saudita': 'SA',
+  'Estados Unidos': 'US', 'Gales': 'GB', 'Inglaterra': 'GB', 'Irán': 'IR',
+  'Senegal': 'SN', 'Países Bajos': 'NL', 'Ecuador': 'EC', 'Qatar': 'QA',
+  'Francia': 'FR', 'Australia': 'AU', 'Dinamarca': 'DK', 'Túnez': 'TN',
+  'Japón': 'JP', 'Costa Rica': 'CR', 'Alemania': 'DE', 'España': 'ES',
+  'Marruecos': 'MA', 'Croacia': 'HR', 'Bélgica': 'BE', 'Canadá': 'CA',
+  'Brasil': 'BR', 'Serbia': 'RS', 'Suiza': 'CH', 'Camerún': 'CM',
+  'Portugal': 'PT', 'Ghana': 'GH', 'Uruguay': 'UY', 'Corea del Sur': 'KR',
+  'Colombia': 'CO', 'Perú': 'PE', 'Argelia': 'DZ', 'Nigeria': 'NG',
+  'Chile': 'CL', 'Irlanda': 'IE', 'Turquía': 'TR',
+  'Egipto': 'EG', 'Nueva Zelanda': 'NZ',
+  'Honduras': 'HN', 'Costa de Marfil': 'CI',
 }
 
-function Flag({ name, size = 32 }) {
+function Flag({ name, size = 40 }) {
   const code = COUNTRY_CODES[name]
   if (!code) return <span style={{fontSize: size * 0.7, lineHeight:1}}>🏆</span>
   return (
     <img
-      src={`https://flagcdn.com/w${size * 2}/${code}.png`}
+      src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`}
       alt={name}
       style={{ width: size, height: size * 0.67, objectFit: 'cover', borderRadius: 3, display: 'block' }}
       onError={e => { e.target.style.display = 'none' }}
