@@ -228,17 +228,26 @@ export default function GroupPage() {
                               <span>{match.away_score}</span>
                             </div>
                           ) : (
-                            <div className={styles.inputs}>
-                              <input
-                                className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
-                                type="number" min="0" max="20"
-                                value={pred.home_score || ""}
-                                onChange={e => !closed && handleScoreChange(match.id, 'home_score', e.target.value)}
-                                readOnly={closed}
-                                placeholder="-"
-                              />
-                              <span className={styles.dash}>-</span>
-                              <input
-                                className={[styles.scoreInput, closed ? styles.scoreInputClosed : ''].join(' ')}
-                                type="number" min="0" max="20"
-                                value={pred.away_score || ""}
+                           <div className={styles.inputs}>
+  <input
+    className={closed ? styles.scoreInput + " " + styles.scoreInputClosed : styles.scoreInput}
+    type="number"
+    min="0"
+    max="20"
+    value={pred.home_score ? pred.home_score : ""}
+    onChange={e => { if (!closed) handleScoreChange(match.id, "home_score", e.target.value) }}
+    readOnly={closed}
+    placeholder="-"
+  />
+  <span className={styles.dash}>-</span>
+  <input
+    className={closed ? styles.scoreInput + " " + styles.scoreInputClosed : styles.scoreInput}
+    type="number"
+    min="0"
+    max="20"
+    value={pred.away_score ? pred.away_score : ""}
+    onChange={e => { if (!closed) handleScoreChange(match.id, "away_score", e.target.value) }}
+    readOnly={closed}
+    placeholder="-"
+  />
+</div>
