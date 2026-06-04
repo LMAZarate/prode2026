@@ -6,7 +6,7 @@ import { useAuth } from '../lib/AuthContext'
 import { Button, Card, Spinner } from '../components/UI'
 import styles from './Admin.module.css'
 
-const ADMIN_ID = 'reemplazar-con-tu-uid'
+const ADMIN_ID = 'MjCOsycVmCRn8PsapnnP1JtKEYv1'
 
 export default function AdminPage() {
   const { user } = useAuth()
