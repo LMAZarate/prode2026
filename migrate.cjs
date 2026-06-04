@@ -1,132 +1,20 @@
-const { initializeApp } = require('firebase/app')
-const { getFirestore, doc, setDoc } = require('firebase/firestore')
+const fs = require('fs')
 
-const app = initializeApp({
-  apiKey: "AIzaSyCOcGz-aYwtPTKe4HvK36mOrb-8HhkXEhQ",
+fs.writeFileSync('src/lib/firebase.js', `import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "prode2026-ed283.firebaseapp.com",
   projectId: "prode2026-ed283",
   storageBucket: "prode2026-ed283.firebasestorage.app",
   messagingSenderId: "589779172002",
   appId: "1:589779172002:web:a97537e7b6eb86f87675fb"
-})
-
-const db = getFirestore(app)
-
-const matches = [
-  {phase:'group',group_name:'A',match_number:1,home_team:'Mexico',away_team:'Sudafrica',city:'Ciudad de Mexico',match_date:'2026-06-11T15:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'A',match_number:2,home_team:'Republica de Corea',away_team:'Republica Checa',city:'Guadalajara',match_date:'2026-06-11T22:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'B',match_number:3,home_team:'Canada',away_team:'Bosnia y Herzegovina',city:'Toronto',match_date:'2026-06-12T15:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'D',match_number:4,home_team:'Estados Unidos',away_team:'Paraguay',city:'Los Angeles',match_date:'2026-06-12T21:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'B',match_number:5,home_team:'Catar',away_team:'Suiza',city:'San Francisco',match_date:'2026-06-13T15:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'C',match_number:6,home_team:'Brasil',away_team:'Marruecos',city:'Nueva York',match_date:'2026-06-13T18:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'C',match_number:7,home_team:'Haiti',away_team:'Escocia',city:'Boston',match_date:'2026-06-13T21:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'D',match_number:8,home_team:'Australia',away_team:'Turquia',city:'Vancouver',match_date:'2026-06-13T00:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'E',match_number:9,home_team:'Alemania',away_team:'Curazao',city:'Houston',match_date:'2026-06-14T13:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'E',match_number:10,home_team:'Costa de Marfil',away_team:'Ecuador',city:'Philadelphia',match_date:'2026-06-14T19:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'F',match_number:11,home_team:'Paises Bajos',away_team:'Japon',city:'Dallas',match_date:'2026-06-14T16:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'F',match_number:12,home_team:'Suecia',away_team:'Tunez',city:'Monterrey',match_date:'2026-06-14T22:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'G',match_number:13,home_team:'Belgica',away_team:'Egipto',city:'Seattle',match_date:'2026-06-15T15:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'G',match_number:14,home_team:'Iran',away_team:'Nueva Zelanda',city:'Los Angeles',match_date:'2026-06-15T21:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'H',match_number:15,home_team:'Espana',away_team:'Cabo Verde',city:'Atlanta',match_date:'2026-06-15T12:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'H',match_number:16,home_team:'Arabia Saudi',away_team:'Uruguay',city:'Miami',match_date:'2026-06-15T18:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'I',match_number:17,home_team:'Francia',away_team:'Senegal',city:'Nueva York',match_date:'2026-06-16T15:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'I',match_number:18,home_team:'Irak',away_team:'Noruega',city:'Boston',match_date:'2026-06-16T18:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'J',match_number:19,home_team:'Argentina',away_team:'Argelia',city:'Kansas City',match_date:'2026-06-16T21:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'J',match_number:20,home_team:'Austria',away_team:'Jordania',city:'San Francisco',match_date:'2026-06-17T00:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'K',match_number:21,home_team:'Portugal',away_team:'RD de Congo',city:'Houston',match_date:'2026-06-17T13:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'K',match_number:22,home_team:'Uzbekistan',away_team:'Colombia',city:'Ciudad de Mexico',match_date:'2026-06-17T22:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'L',match_number:23,home_team:'Inglaterra',away_team:'Croacia',city:'Dallas',match_date:'2026-06-17T16:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'L',match_number:24,home_team:'Ghana',away_team:'Panama',city:'Toronto',match_date:'2026-06-17T19:00:00Z',status:'upcoming',jornada:1},
-  {phase:'group',group_name:'B',match_number:25,home_team:'Suiza',away_team:'Bosnia y Herzegovina',city:'Los Angeles',match_date:'2026-06-18T15:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'B',match_number:26,home_team:'Canada',away_team:'Catar',city:'Vancouver',match_date:'2026-06-18T18:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'A',match_number:27,home_team:'Republica Checa',away_team:'Sudafrica',city:'Atlanta',match_date:'2026-06-18T12:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'A',match_number:28,home_team:'Mexico',away_team:'Republica de Corea',city:'Guadalajara',match_date:'2026-06-18T21:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'C',match_number:29,home_team:'Escocia',away_team:'Marruecos',city:'Boston',match_date:'2026-06-19T18:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'C',match_number:30,home_team:'Brasil',away_team:'Haiti',city:'Philadelphia',match_date:'2026-06-19T21:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'D',match_number:31,home_team:'Estados Unidos',away_team:'Australia',city:'Seattle',match_date:'2026-06-19T15:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'D',match_number:32,home_team:'Turquia',away_team:'Paraguay',city:'San Francisco',match_date:'2026-06-19T00:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'E',match_number:33,home_team:'Alemania',away_team:'Costa de Marfil',city:'Toronto',match_date:'2026-06-20T16:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'E',match_number:34,home_team:'Ecuador',away_team:'Curazao',city:'Kansas City',match_date:'2026-06-20T22:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'F',match_number:35,home_team:'Paises Bajos',away_team:'Suecia',city:'Houston',match_date:'2026-06-20T13:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'F',match_number:36,home_team:'Tunez',away_team:'Japon',city:'Monterrey',match_date:'2026-06-20T00:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'G',match_number:37,home_team:'Belgica',away_team:'Iran',city:'Los Angeles',match_date:'2026-06-21T15:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'G',match_number:38,home_team:'Nueva Zelanda',away_team:'Egipto',city:'Vancouver',match_date:'2026-06-21T21:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'H',match_number:39,home_team:'Espana',away_team:'Arabia Saudi',city:'Atlanta',match_date:'2026-06-21T12:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'H',match_number:40,home_team:'Uruguay',away_team:'Cabo Verde',city:'Miami',match_date:'2026-06-21T18:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'I',match_number:41,home_team:'Francia',away_team:'Irak',city:'Philadelphia',match_date:'2026-06-22T17:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'I',match_number:42,home_team:'Noruega',away_team:'Senegal',city:'Nueva York',match_date:'2026-06-22T20:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'J',match_number:43,home_team:'Argentina',away_team:'Austria',city:'Dallas',match_date:'2026-06-22T13:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'J',match_number:44,home_team:'Jordania',away_team:'Argelia',city:'San Francisco',match_date:'2026-06-22T23:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'K',match_number:45,home_team:'Portugal',away_team:'Uzbekistan',city:'Houston',match_date:'2026-06-23T13:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'K',match_number:46,home_team:'Colombia',away_team:'RD de Congo',city:'Guadalajara',match_date:'2026-06-23T22:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'L',match_number:47,home_team:'Inglaterra',away_team:'Ghana',city:'Boston',match_date:'2026-06-23T16:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'L',match_number:48,home_team:'Panama',away_team:'Croacia',city:'Toronto',match_date:'2026-06-23T19:00:00Z',status:'upcoming',jornada:2},
-  {phase:'group',group_name:'A',match_number:49,home_team:'Republica Checa',away_team:'Mexico',city:'Ciudad de Mexico',match_date:'2026-06-24T21:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'A',match_number:50,home_team:'Sudafrica',away_team:'Republica de Corea',city:'Monterrey',match_date:'2026-06-24T21:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'B',match_number:51,home_team:'Suiza',away_team:'Canada',city:'Vancouver',match_date:'2026-06-24T15:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'B',match_number:52,home_team:'Bosnia y Herzegovina',away_team:'Catar',city:'Seattle',match_date:'2026-06-24T15:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'C',match_number:53,home_team:'Brasil',away_team:'Escocia',city:'Miami',match_date:'2026-06-24T18:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'C',match_number:54,home_team:'Marruecos',away_team:'Haiti',city:'Atlanta',match_date:'2026-06-24T18:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'D',match_number:55,home_team:'Turquia',away_team:'Estados Unidos',city:'Los Angeles',match_date:'2026-06-25T22:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'D',match_number:56,home_team:'Paraguay',away_team:'Australia',city:'San Francisco',match_date:'2026-06-25T22:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'E',match_number:57,home_team:'Curazao',away_team:'Costa de Marfil',city:'Philadelphia',match_date:'2026-06-25T16:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'E',match_number:58,home_team:'Ecuador',away_team:'Alemania',city:'Nueva York',match_date:'2026-06-25T16:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'F',match_number:59,home_team:'Japon',away_team:'Suecia',city:'Dallas',match_date:'2026-06-25T19:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'F',match_number:60,home_team:'Tunez',away_team:'Paises Bajos',city:'Kansas City',match_date:'2026-06-25T19:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'G',match_number:61,home_team:'Egipto',away_team:'Iran',city:'Seattle',match_date:'2026-06-26T23:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'G',match_number:62,home_team:'Nueva Zelanda',away_team:'Belgica',city:'Vancouver',match_date:'2026-06-26T23:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'H',match_number:63,home_team:'Cabo Verde',away_team:'Arabia Saudi',city:'Houston',match_date:'2026-06-26T20:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'H',match_number:64,home_team:'Uruguay',away_team:'Espana',city:'Guadalajara',match_date:'2026-06-26T20:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'I',match_number:65,home_team:'Noruega',away_team:'Francia',city:'Boston',match_date:'2026-06-26T15:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'I',match_number:66,home_team:'Senegal',away_team:'Irak',city:'Toronto',match_date:'2026-06-26T15:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'J',match_number:67,home_team:'Argelia',away_team:'Austria',city:'Kansas City',match_date:'2026-06-27T22:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'J',match_number:68,home_team:'Jordania',away_team:'Argentina',city:'Dallas',match_date:'2026-06-27T22:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'K',match_number:69,home_team:'Colombia',away_team:'Portugal',city:'Miami',match_date:'2026-06-27T19:30:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'K',match_number:70,home_team:'RD de Congo',away_team:'Uzbekistan',city:'Atlanta',match_date:'2026-06-27T19:30:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'L',match_number:71,home_team:'Panama',away_team:'Inglaterra',city:'Nueva York',match_date:'2026-06-27T17:00:00Z',status:'locked',jornada:3},
-  {phase:'group',group_name:'L',match_number:72,home_team:'Croacia',away_team:'Ghana',city:'Philadelphia',match_date:'2026-06-27T17:00:00Z',status:'locked',jornada:3},
-  {phase:'r32',group_name:null,match_number:73,home_team:'1A',away_team:'2B',city:'TBD',match_date:'2026-07-04T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:74,home_team:'1C',away_team:'2D',city:'TBD',match_date:'2026-07-04T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:75,home_team:'1E',away_team:'2F',city:'TBD',match_date:'2026-07-05T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:76,home_team:'1G',away_team:'2H',city:'TBD',match_date:'2026-07-05T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:77,home_team:'1I',away_team:'2J',city:'TBD',match_date:'2026-07-06T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:78,home_team:'1K',away_team:'2L',city:'TBD',match_date:'2026-07-06T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:79,home_team:'1B',away_team:'2A',city:'TBD',match_date:'2026-07-07T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:80,home_team:'1D',away_team:'2C',city:'TBD',match_date:'2026-07-07T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:81,home_team:'1F',away_team:'2E',city:'TBD',match_date:'2026-07-08T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:82,home_team:'1H',away_team:'2G',city:'TBD',match_date:'2026-07-08T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:83,home_team:'1J',away_team:'2I',city:'TBD',match_date:'2026-07-09T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:84,home_team:'1L',away_team:'2K',city:'TBD',match_date:'2026-07-09T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:85,home_team:'Mejor 3 A/B/C/D',away_team:'Mejor 3 E/F/G/H',city:'TBD',match_date:'2026-07-10T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:86,home_team:'Mejor 3 I/J/K/L',away_team:'Mejor 3 A/B/E/F',city:'TBD',match_date:'2026-07-10T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:87,home_team:'Mejor 3 C/D/G/H',away_team:'Mejor 3 B/C/F/G',city:'TBD',match_date:'2026-07-11T18:00:00Z',status:'locked',jornada:4},
-  {phase:'r32',group_name:null,match_number:88,home_team:'Mejor 3 A/D/I/L',away_team:'Mejor 3 J/K',city:'TBD',match_date:'2026-07-11T21:00:00Z',status:'locked',jornada:4},
-  {phase:'r16',group_name:null,match_number:89,home_team:'G73',away_team:'G74',city:'TBD',match_date:'2026-07-14T18:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:90,home_team:'G75',away_team:'G76',city:'TBD',match_date:'2026-07-14T21:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:91,home_team:'G77',away_team:'G78',city:'TBD',match_date:'2026-07-15T18:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:92,home_team:'G79',away_team:'G80',city:'TBD',match_date:'2026-07-15T21:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:93,home_team:'G81',away_team:'G82',city:'TBD',match_date:'2026-07-16T18:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:94,home_team:'G83',away_team:'G84',city:'TBD',match_date:'2026-07-16T21:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:95,home_team:'G85',away_team:'G86',city:'TBD',match_date:'2026-07-17T18:00:00Z',status:'locked',jornada:5},
-  {phase:'r16',group_name:null,match_number:96,home_team:'G87',away_team:'G88',city:'TBD',match_date:'2026-07-17T21:00:00Z',status:'locked',jornada:5},
-  {phase:'qf',group_name:null,match_number:97,home_team:'G89',away_team:'G90',city:'TBD',match_date:'2026-07-21T18:00:00Z',status:'locked',jornada:6},
-  {phase:'qf',group_name:null,match_number:98,home_team:'G91',away_team:'G92',city:'TBD',match_date:'2026-07-21T21:00:00Z',status:'locked',jornada:6},
-  {phase:'qf',group_name:null,match_number:99,home_team:'G93',away_team:'G94',city:'TBD',match_date:'2026-07-22T18:00:00Z',status:'locked',jornada:6},
-  {phase:'qf',group_name:null,match_number:100,home_team:'G95',away_team:'G96',city:'TBD',match_date:'2026-07-22T21:00:00Z',status:'locked',jornada:6},
-  {phase:'sf',group_name:null,match_number:101,home_team:'G97',away_team:'G98',city:'TBD',match_date:'2026-07-26T20:00:00Z',status:'locked',jornada:7},
-  {phase:'sf',group_name:null,match_number:102,home_team:'G99',away_team:'G100',city:'TBD',match_date:'2026-07-27T20:00:00Z',status:'locked',jornada:7},
-  {phase:'3rd',group_name:null,match_number:103,home_team:'Perdedor SF1',away_team:'Perdedor SF2',city:'TBD',match_date:'2026-07-30T20:00:00Z',status:'locked',jornada:8},
-  {phase:'final',group_name:null,match_number:104,home_team:'Ganador SF1',away_team:'Ganador SF2',city:'TBD',match_date:'2026-08-01T20:00:00Z',status:'locked',jornada:8},
-]
-
-async function seed() {
-  for (const m of matches) {
-    const id = 'm' + m.match_number
-    await setDoc(doc(db, 'matches', id), m)
-    console.log('OK m' + m.match_number)
-  }
-  console.log('TODOS LOS PARTIDOS CARGADOS!')
-  process.exit(0)
 }
 
-seed().catch(e => { console.error(e); process.exit(1) })
+const app = initializeApp(firebaseConfig)
+export const auth = getAuth(app)
+export const db = getFirestore(app)
+`, 'utf8')
+console.log('OK')
