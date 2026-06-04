@@ -6,7 +6,7 @@ import { useAuth } from '../lib/AuthContext'
 import { Button, Card, Avatar, Spinner } from '../components/UI'
 import styles from './Dashboard.module.css'
 
-const ADMIN_ID = '7af28f93-2fde-4767-a74a-d06a44d26aed'
+const ADMIN_ID = 'MjCOsycVmCRn8PsapnnP1JtKEYv1'
 
 export default function Dashboard() {
   const { user, profile, signOut } = useAuth()
