@@ -19,8 +19,7 @@ export default function Dashboard() {
   const [joinCode, setJoinCode] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState('')
-  const isAdmin = user?.uid ===
-  (()=>{console.log("UID:",user?.uid)})() || ADMIN_ID
+  const isAdmin = user?.uid === ADMIN_ID
 
   useEffect(() => { if (user) fetchGroups() }, [user])
 
