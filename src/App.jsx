@@ -3,15 +3,12 @@ import { AuthProvider, useAuth } from './lib/AuthContext'
 import AuthPage from './pages/Auth'
 import Dashboard from './pages/Dashboard'
 import GroupPage from './pages/Group'
+import AdminPage from './pages/Admin'
 import './index.css'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <div style={{ fontSize: 32 }}>⚽</div>
-    </div>
-  )
+  if (loading) return <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}><div style={{fontSize:32}}>⚽</div></div>
   return user ? children : <Navigate to="/" replace />
 }
 
@@ -29,6 +26,7 @@ export default function App() {
           <Route path="/" element={<PublicRoute><AuthPage /></PublicRoute>} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/grupo/:id" element={<PrivateRoute><GroupPage /></PrivateRoute>} />
+          <Route path="/admin" element={<PrivateRoute><AdminPage /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

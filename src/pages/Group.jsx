@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { collection, doc, getDoc, getDocs, query, where, setDoc, onSnapshot } from 'firebase/firestore'
 import { useAuth } from '../lib/AuthContext'
 import { Button, Card, Avatar, Spinner, PhaseLabel } from '../components/UI'
 import styles from './Group.module.css'
@@ -40,31 +41,39 @@ export default function GroupPage() {
   const [copied,setCopied] = useState(false)
 
   const load = useCallback(async () => {
-    const [g,m,p,l,mb] = await Promise.all([
-      supabase.from('groups').select('*').eq('id',id).single(),
-      supabase.from('matches').select('*').order('match_number'),
-      supabase.from('predictions').select('*').eq('group_id',id).eq('user_id',user.id),
-      supabase.from('leaderboard').select('*').eq('group_id',id).order('total_points',{ascending:false}),
-      supabase.from('group_members').select('user_id, profiles(username, avatar_color)').eq('group_id',id)
-    ])
-    if (g.error) { navigate('/dashboard'); return }
-    setGroup(g.data)
-    setMatches(m.data||[])
-    const pm={}; (p.data||[]).forEach(x=>{pm[x.match_id]=x})
+    const gSnap = await getDoc(doc(db,'groups',id))
+    if (!gSnap.exists()) { navigate('/dashboard'); return }
+    setGroup({id:gSnap.id,...gSnap.data()})
+
+    const mSnap = await getDocs(collection(db,'matches'))
+    const allMatches = mSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.match_number-b.match_number)
+    setMatches(allMatches)
+
+    const pSnap = await getDocs(query(collection(db,'predictions'),where('group_id','==',id),where('user_id','==',user.uid)))
+    const pm={}; pSnap.docs.forEach(d=>{const x=d.data();pm[x.match_id]=x})
     setPreds(pm)
-    setLb(l.data||[])
-    setMembers((mb.data||[]).map(x=>x.profiles))
+
+    const mbSnap = await getDocs(query(collection(db,'group_members'),where('group_id','==',id)))
+    const mbs=[]
+    for (const d of mbSnap.docs) {
+      const pSnap2 = await getDoc(doc(db,'profiles',d.data().user_id))
+      if (pSnap2.exists()) mbs.push(pSnap2.data())
+    }
+    setMembers(mbs)
+
+    const lbData=[]
+    for (const mb of mbs) {
+      const pSnap3 = await getDocs(query(collection(db,'predictions'),where('group_id','==',id),where('user_id','==',mb.id)))
+      let total=0,exact=0,correct=0,total_preds=0
+      pSnap3.docs.forEach(d=>{const x=d.data();total+=(x.points||0);if(x.points===3)exact++;if(x.points===1)correct++;total_preds++})
+      lbData.push({...mb,total_points:total,exact_scores:exact,correct_results:correct,total_predictions:total_preds})
+    }
+    lbData.sort((a,b)=>b.total_points-a.total_points||b.exact_scores-a.exact_scores)
+    setLb(lbData)
     setLoading(false)
   },[id,user,navigate])
 
-  useEffect(()=>{
-    load()
-    const ch = supabase.channel('g-'+id)
-      .on('postgres_changes',{event:'*',schema:'public',table:'predictions',filter:'group_id=eq.'+id},load)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'matches'},load)
-      .subscribe()
-    return ()=>supabase.removeChannel(ch)
-  },[load,id])
+  useEffect(()=>{ load() },[load])
 
   function chg(mid,side,val) {
     const n = val===''?'':Math.max(0,Math.min(20,parseInt(val)||0))
@@ -73,18 +82,19 @@ export default function GroupPage() {
 
   async function save() {
     setSaving(true);setMsg('')
-    const ups=[];const now=new Date().toISOString()
-    Object.keys(preds).forEach(mid=>{
+    const now=new Date().toISOString()
+    let count=0
+    for (const mid of Object.keys(preds)) {
       const pred=preds[mid]
-      const match=matches.find(x=>x.id===parseInt(mid))
-      if (!match||match.status==='finished'||match.status==='locked') return
-      if (match.match_date&&new Date(match.match_date)<new Date()) return
-      if (pred.home_score===''||pred.away_score===''||pred.home_score===undefined||pred.away_score===undefined) return
-      ups.push({user_id:user.id,group_id:id,match_id:parseInt(mid),home_score:parseInt(pred.home_score),away_score:parseInt(pred.away_score),updated_at:now})
-    })
-    if (!ups.length){setMsg('Sin cambios.');setSaving(false);return}
-    const r = await supabase.from('predictions').upsert(ups,{onConflict:'user_id,group_id,match_id'})
-    setMsg(r.error?'Error.':'Guardado! '+ups.length+' pronostico'+(ups.length>1?'s':''))
+      const match=matches.find(x=>x.id===mid||x.match_number===parseInt(mid))
+      if (!match||match.status==='finished'||match.status==='locked') continue
+      if (match.match_date&&new Date(match.match_date)<new Date()) continue
+      if (pred.home_score===''||pred.away_score===''||pred.home_score===undefined||pred.away_score===undefined) continue
+      const docId = id+'_'+user.uid+'_'+mid
+      await setDoc(doc(db,'predictions',docId),{user_id:user.uid,group_id:id,match_id:mid,home_score:parseInt(pred.home_score),away_score:parseInt(pred.away_score),points:0,updated_at:now})
+      count++
+    }
+    setMsg(count?'Guardado! '+count+' pronostico'+(count>1?'s':''):'Sin cambios.')
     setSaving(false);setTimeout(()=>setMsg(''),3000)
   }
 
@@ -176,9 +186,9 @@ export default function GroupPage() {
             <div className={styles.lbCard}>
               <div className={styles.lbHeader}><span>#</span><span>Jugador</span><span>Exactos</span><span>Pts</span></div>
               {lb.map((row,i)=>(
-                <div key={row.user_id} className={row.user_id===user.id?styles.lbRow+' '+styles.lbRowMe:styles.lbRow}>
+                <div key={row.id} className={row.id===user.uid?styles.lbRow+' '+styles.lbRowMe:styles.lbRow}>
                   <span className={styles.lbPos}>{i+1}</span>
-                  <div className={styles.lbUser}><Avatar name={row.username} color={row.avatar_color} size={30}/><div><div className={styles.lbName}>{row.username}{row.user_id===user.id&&<span className={styles.youChip}>Vos</span>}</div><div className={styles.lbSub}>{row.total_predictions} pronosticos</div></div></div>
+                  <div className={styles.lbUser}><Avatar name={row.username} color={row.avatar_color} size={30}/><div><div className={styles.lbName}>{row.username}{row.id===user.uid&&<span className={styles.youChip}>Vos</span>}</div><div className={styles.lbSub}>{row.total_predictions} pronosticos</div></div></div>
                   <span className={styles.lbExact}>{row.exact_scores}</span>
                   <span className={styles.lbPts}>{row.total_points}</span>
                 </div>
@@ -197,8 +207,8 @@ export default function GroupPage() {
             <div className={styles.memberList}>
               <div className={styles.memberListTitle}>{members.length} participantes</div>
               {members.map(m=>{
-                const row=lb.find(l=>l.username===m.username)
-                return <div key={m.username} className={styles.memberRow}><Avatar name={m.username} color={m.avatar_color} size={36}/><div className={styles.memberInfo}><div className={styles.memberName}>{m.username}</div><div className={styles.memberStat}>{row?row.total_predictions:0} pronosticos - {row?row.total_points:0} pts</div></div></div>
+                const row=lb.find(l=>l.id===m.id)
+                return <div key={m.id} className={styles.memberRow}><Avatar name={m.username} color={m.avatar_color} size={36}/><div className={styles.memberInfo}><div className={styles.memberName}>{m.username}</div><div className={styles.memberStat}>{row?row.total_predictions:0} pronosticos - {row?row.total_points:0} pts</div></div></div>
               })}
             </div>
           </div>

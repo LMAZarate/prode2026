@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { auth, db } from './firebase'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 
 const AuthContext = createContext(null)
 
@@ -9,44 +11,34 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else setLoading(false)
+    const unsub = onAuthStateChanged(auth, async u => {
+      setUser(u)
+      if (u) {
+        const snap = await getDoc(doc(db, 'profiles', u.uid))
+        setProfile(snap.exists() ? snap.data() : null)
+      } else {
+        setProfile(null)
+      }
+      setLoading(false)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else { setProfile(null); setLoading(false) }
-    })
-    return () => subscription.unsubscribe()
+    return unsub
   }, [])
 
-  async function fetchProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data)
-    setLoading(false)
-  }
-
   async function signUp(email, password, username, phone = '') {
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-    if (data.user) {
-      const colors = ['blue', 'teal', 'purple', 'coral', 'amber', 'green']
-      const color = colors[Math.floor(Math.random() * colors.length)]
-      await supabase.from('profiles').insert({ id: data.user.id, username, avatar_color: color, phone: phone || null })
-    }
-    return data
+    const { user: u } = await createUserWithEmailAndPassword(auth, email, password)
+    const colors = ['blue','teal','purple','coral','amber','green']
+    const color = colors[Math.floor(Math.random() * colors.length)]
+    const p = { id: u.uid, username, avatar_color: color, phone: phone || '', created_at: new Date().toISOString() }
+    await setDoc(doc(db, 'profiles', u.uid), p)
+    setProfile(p)
   }
 
   async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-    return data
+    await signInWithEmailAndPassword(auth, email, password)
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
+    await fbSignOut(auth)
   }
 
   return (
