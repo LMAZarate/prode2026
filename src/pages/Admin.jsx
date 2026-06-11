@@ -107,7 +107,7 @@ export default function AdminPage() {
 
       {jornadaMatches.map(match => (
         <Card key={match.id} style={{marginBottom:10,padding:'1rem'}}>
-          <div style={{fontSize:11,color:'#999',marginBottom:8}}>{match.city} - {match.match_date ? new Date(match.match_date).toLocaleDateString('es-AR') : ''}</div>
+          <div style={{fontSize:11,color:'#999',marginBottom:8}}>{match.city} - {match.match_date ? new Date(match.match_date).toLocaleString('es-AR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'}) : ''}</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',alignItems:'center',gap:8}}>
             <div style={{textAlign:'center',fontSize:13,fontWeight:500}}>{match.home_team}</div>
             <div style={{display:'flex',gap:6,alignItems:'center'}}>

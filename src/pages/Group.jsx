@@ -17,7 +17,7 @@ function Flag({name,size=40}) {
 
 function fmt(d) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString('es-AR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+  return new Date(d).toLocaleString('es-AR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires'})
 }
 
 function isClosed(m) {
