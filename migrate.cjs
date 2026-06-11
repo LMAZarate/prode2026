@@ -1,15 +1,10 @@
 const fs = require('fs')
-let c = fs.readFileSync('src/pages/Group.jsx', 'utf8')
+let c = fs.readFileSync('src/pages/Group.module.css', 'utf8')
 
-// Cambiar valor default de 0 a vacio
-c = c.replace('value={pred.home_score!==undefined?pred.home_score:0}', 'value={pred.home_score!==undefined?pred.home_score:""}')
-c = c.replace('value={pred.away_score!==undefined?pred.away_score:0}', 'value={pred.away_score!==undefined?pred.away_score:""}')
-
-// Corregir condicion de guardado
 c = c.replace(
-  "if (pred.home_score===''||pred.away_score===''||pred.home_score===undefined||pred.away_score===undefined) return",
-  "if (pred.home_score===undefined||pred.away_score===undefined) return"
+  '.saveBar {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  padding: 1rem;\n  background: var(--c-surface);\n  border-top: 0.5px solid var(--c-border);',
+  '.saveBar {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  padding: 1rem;\n  background: var(--c-surface);\n  border-top: 2px solid var(--c-accent);\n  box-shadow: 0 -4px 12px rgba(0,0,0,0.15);'
 )
 
-fs.writeFileSync('src/pages/Group.jsx', c, 'utf8')
+fs.writeFileSync('src/pages/Group.module.css', c, 'utf8')
 console.log('OK')
