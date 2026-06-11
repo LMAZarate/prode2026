@@ -161,9 +161,9 @@ export default function GroupPage() {
                             <div className={styles.result}><span>{match.home_score}</span><span className={styles.dash}>-</span><span>{match.away_score}</span></div>
                           ):(
                             <div className={styles.inputs}>
-                              <input className={cl?styles.scoreInput+' '+styles.scoreInputClosed:styles.scoreInput} type="number" min="0" max="20" value={pred.home_score!==undefined?pred.home_score:0} onChange={e=>{if(!cl)chg(match.id,'home_score',e.target.value)}} readOnly={cl}/>
+                              <input className={cl?styles.scoreInput+' '+styles.scoreInputClosed:styles.scoreInput} type="number" min="0" max="20" value={pred.home_score!==undefined?pred.home_score:""} onChange={e=>{if(!cl)chg(match.id,'home_score',e.target.value)}} readOnly={cl}/>
                               <span className={styles.dash}>-</span>
-                              <input className={cl?styles.scoreInput+' '+styles.scoreInputClosed:styles.scoreInput} type="number" min="0" max="20" value={pred.away_score!==undefined?pred.away_score:0} onChange={e=>{if(!cl)chg(match.id,'away_score',e.target.value)}} readOnly={cl}/>
+                              <input className={cl?styles.scoreInput+' '+styles.scoreInputClosed:styles.scoreInput} type="number" min="0" max="20" value={pred.away_score!==undefined?pred.away_score:""} onChange={e=>{if(!cl)chg(match.id,'away_score',e.target.value)}} readOnly={cl}/>
                             </div>
                           )}
                         </div>

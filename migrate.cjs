@@ -1,33 +1,15 @@
-const { initializeApp } = require('firebase/app')
-const { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc } = require('firebase/firestore')
+const fs = require('fs')
+let c = fs.readFileSync('src/pages/Group.jsx', 'utf8')
 
-const app = initializeApp({
-  apiKey: process.env.FB_KEY || "AIzaSyCOcGz-aYwtPTKe4HvK36mOrb-8HhkXEhQ",
-  authDomain: "prode2026-ed283.firebaseapp.com",
-  projectId: "prode2026-ed283",
-})
+// Cambiar valor default de 0 a vacio
+c = c.replace('value={pred.home_score!==undefined?pred.home_score:0}', 'value={pred.home_score!==undefined?pred.home_score:""}')
+c = c.replace('value={pred.away_score!==undefined?pred.away_score:0}', 'value={pred.away_score!==undefined?pred.away_score:""}')
 
-const db = getFirestore(app)
+// Corregir condicion de guardado
+c = c.replace(
+  "if (pred.home_score===''||pred.away_score===''||pred.home_score===undefined||pred.away_score===undefined) return",
+  "if (pred.home_score===undefined||pred.away_score===undefined) return"
+)
 
-async function reset() {
-  // Borrar predicciones
-  const pSnap = await getDocs(collection(db, 'predictions'))
-  for (const d of pSnap.docs) {
-    await deleteDoc(doc(db, 'predictions', d.id))
-    console.log('Borrado prediction:', d.id)
-  }
-
-  // Resetear partidos finished a upcoming
-  const mSnap = await getDocs(collection(db, 'matches'))
-  for (const d of mSnap.docs) {
-    if (d.data().status === 'finished') {
-      await updateDoc(doc(db, 'matches', d.id), { status: 'upcoming', home_score: null, away_score: null })
-      console.log('Reseteado match:', d.data().match_number)
-    }
-  }
-
-  console.log('LISTO!')
-  process.exit(0)
-}
-
-reset().catch(e => { console.error(e); process.exit(1) })
+fs.writeFileSync('src/pages/Group.jsx', c, 'utf8')
+console.log('OK')
